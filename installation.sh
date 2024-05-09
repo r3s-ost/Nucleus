@@ -9,7 +9,7 @@ sudo wget -q https://kali.download/kali/pool/main/k/kali-archive-keyring/kali-ar
 sudo dpkg -i kali-archive-keyring_2024.1_all.deb
 rm -rf kali-archive-keyring_2024.1_all.deb
 sudo apt -y update
-sudo apt -y install git make gcc
+sudo apt -y install git make gcc dnsutils
 
 #====================#
 # API KEYS & Configs #
