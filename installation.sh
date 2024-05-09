@@ -25,12 +25,12 @@ echo -e "\n[+] Finding latest version of go\n"
 DL_PATH_URL="$(wget --no-check-certificate -qO- https://golang.org/dl/ | grep -oP '\/dl\/go([0-9\.]+)\.linux-amd64\.tar\.gz' | head -n 1)" 
 latest="$(echo $DL_PATH_URL | grep -oP 'go[0-9\.]+' | grep -oP '[0-9\.]+' | head -c -2 )"
 echo -e "\n[+] Downloading latest go version: ${latest}\n"
-wget -q --no-check-certificate --continue "$DL_HOME$DL_PATH_URL" -P $GOTOOLS
-sudo rm -rf /usr/local/go && tar -C /usr/local -xzf go1.22.2.linux-amd64.tar.gz
+wget -q --no-check-certificate --continue "$DL_HOME$DL_PATH_URL"
+sudo rm -rf /usr/local/go && tar -C /usr/local -xzf go*.gz
 sudo apt remove -y golang-go
 sudo rm ./go*.gz
-echo "export PATH=$PATH:/usr/local/go/bin" >> /root/.bashrc
-source /root/.bashrc
+echo "export PATH=$PATH:/usr/local/go/bin" >> /root/.profile
+source /root/.profile
 echo -e "\n[+] Finding latest version of Chrome\n"
 wget --no-check-certificate -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 apt install -qq ./google-chrome-stable_current_amd64.deb -y
