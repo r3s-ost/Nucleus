@@ -70,24 +70,30 @@ handle_domain() {
     
     echo -e "\n[+] Discovering subdomains for $domain...\n"
     ~/go/bin/subfinder -d $domain -silent -o "$domain/subdomains_$domain.txt"
+    echo "Subdomains for $domain complete" | ~/go/bin/notify -silent -bulk
 
     echo -e "\n[+] Enumerating live web hosts..."
     cat "$domain/subdomains_$domain.txt" | ~/go/bin/httpx -p 66,80,81,443,445,457,1080,1100,1241,1352,1433,1434,1521,1944,2301,3000,3128,3306,4000,4001,4002,4100,4433,5000,5060,5061,5432,5800,5801,5802,6346,6347,7001,7002,8000,8001,8009,8008,8080,8443,8089,9000,9001,30821,10443,10943,13110,1720,38443 -silent -o "$domain/live_hosts_$domain.txt"
-
+    echo "Live web hosts for $domain complete" | ~/go/bin/notify -silent -bulk
+    
     echo -e "\n[+] Taking screenshots of live web hosts...\n"
     ~/go/bin/gowitness file -f "$domain/live_hosts_$domain.txt" --delay 10 -P "$domain/screenshots"
+    echo "Screenshots for $domain complete" | ~/go/bin/notify -silent -bulk
 
     echo -e "\n[+] Checking for open ports...\n"
     cat "$domain/subdomains_$domain.txt" | xargs -n1 -P100 dig +short +retry=3 | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' |sort -u > $domain/subs_to_ips.txt
     masscan -iL "$domain/subs_to_ips.txt" --rate=1000 -p 1-65535 -oL $domain/masscan_results.txt
+    echo "Open ports for $domain complete" | ~/go/bin/notify -silent -bulk
 
     echo -e "\n[+] Checking for XSS...\n"
-    cat live_hosts_$domain.txt | gau | dalfox pipe -o xss_$domain.txt --silence #| notify -silent bulk
+    cat $domain/live_hosts_$domain.txt | gau | dalfox pipe -o xss_$domain.txt --silence
+    echo "XSS checks for $domain complete" | ~/go/bin/notify -silent -bulk
 
     echo -e "\n[+] Checking for vulnerabilities...\n"
-    ~/go/bin/nuclei -silent -l "$domain/live_hosts_$domain.txt" -o "$domain/vulnerabilities_$domain.txt" #| notify -silent -bulk
+    ~/go/bin/nuclei -silent -l "$domain/live_hosts_$domain.txt" -o "$domain/vulnerabilities_$domain.txt"
+    echo "Nuclei scan for $domain complete" | ~/go/bin/notify -silent -bulk
 
-    echo -e "\n[+] Operations completed!"
+    echo "Operations completed for $domain | ~/go/bin/notify -silent -bulk"
 }
 
 # Function to handle IP-based operations
@@ -95,20 +101,25 @@ handle_ip() {
     local ip=$1
     echo -e "\n[+] Enumerating live hosts for $ip...\n"
     echo $ip | ~/go/bin/httpx -p 66,80,81,443,445,457,1080,1100,1241,1352,1433,1434,1521,1944,2301,3000,3128,3306,4000,4001,4002,4100,4433,5000,5060,5061,5432,5800,5801,5802,6346,6347,7001,7002,8000,8001,8009,8008,8080,8443,8089,9000,9001,30821,10443,10943,13110,1720,38443 -silent -o live_hosts_$ip.txt
-
+    echo "Live web hosts for $domain complete" | ~/go/bin/notify -silent -bulk
+    
     echo -e "\n[+] Taking screenshots of live web hosts...\n"
     ~/go/bin/gowitness file -f "live_hosts_$ip.txt" --delay 10 -P screenshots_$ip
+    echo "Screenshots for $domain complete" | ~/go/bin/notify -silent -bulk
 
     echo -e "\n[+] Checking for open ports...\n"
     masscan $ip --rate=1000 -p 1-65535 -oL masscan_results_$ip.txt
+    echo "Open ports for $domain complete" | ~/go/bin/notify -silent -bulk
 
     echo -e "\n[+] Checking for XSS...\n"
-    cat live_hosts_$ip.txt | gau | dalfox pipe -o xss_$ip.txt --silence #| notify -silent bulk
+    cat live_hosts_$ip.txt | gau | dalfox pipe -o xss_$ip.txt --silence
+    echo "XSS checks for $domain complete" | ~/go/bin/notify -silent -bulk
 
     echo -e "\n[+] Checking for vulnerabilities...\n"
-    ~/go/bin/nuclei -silent -l live_hosts_$ip.txt -o vulnerabilities_$ip.txt #| notify -silent 
+    ~/go/bin/nuclei -silent -l live_hosts_$ip.txt -o vulnerabilities_$ip.txt
+    echo "Nuclei scan for $domain complete" | ~/go/bin/notify -silent -bulk
 
-    echo -e "\n[+] Operations completed!"
+    echo "Operations completed for $domain | ~/go/bin/notify -silent -bulk"
 }
 
 
